@@ -1,0 +1,19 @@
+framework:
+  secret: 478f3a4c51824ad23cb50c1c60670c0f
+
+database:
+  host: 192.168.12.1
+  port: 3306
+  name: task
+  username: task
+  password: task
+
+logger:
+  path: var/log/
+  level: info
+  file: task.log
+
+cache:
+  path: var/cache
+
+environment: dev

@@ -1,0 +1,43 @@
+version: "3.1"
+services:
+    mysql:
+      image: mysql:5.7
+      container_name: task-mysql
+      working_dir: /www
+      domainname: database.task.local
+      hostname: database.task.local
+      dns: 127.0.9.9
+      volumes:
+        - .:/www
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=task
+        - MYSQL_USER=task
+        - MYSQL_PASSWORD=task
+      ports:
+        - "3306:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: task-webserver
+      working_dir: /www
+      domainname: api.task.local
+      hostname: api.task.local
+      dns: 127.0.9.9
+      volumes:
+          - .:/www
+          - ./env/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "80:80"
+
+    php-fpm:
+      build: env/php-fpm
+      container_name: task-php-fpm
+      working_dir: /www
+      dns: 127.0.9.9
+      expose:
+        - "9000"
+      volumes:
+        - .:/www
+        - ./env/php-fpm/php-ini-overrides.ini:/etc/php/7.0/fpm/conf.d/99-overrides.ini
+
