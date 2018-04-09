@@ -1,6 +1,8 @@
 <?php
 namespace Application\Controller;
 
+use Domain\Task\Exception;
+use Domain\Task\Repository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,57 +12,114 @@ use Application\Controller\Validator\Task as TaskValidator;
 
 class TaskController
 {
-    protected $service;
-    protected $logger;
+    /**
+     * @var \Domain\Task\Service
+     */
+    private $service;
 
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @param \Psr\Log\LoggerInterface
+     */
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    public function listAction()
+    /**
+     * GET /task
+     * List all tasks
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function listAction() : JsonResponse
     {
         return $this->getService()->all();
     }
 
-    public function getAction(int $id)
+    /**
+     * GET /task/{id}
+     * Task Details
+     *
+     * @param int $id
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getAction(int $id) : JsonResponse
     {
         return $this->getService()->get($id);
     }
 
+    /**
+     * POST /task
+     * Create a task
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @throws \Domain\Task\Exception
+     */
     public function createAction(Request $request)
     {
-        $content = $this->getContent($request);
+        $content = $this->getContentAsArray($request);
         $validator = TaskValidator::toCreate($content);
         if ($validator !== true) {
-            return $this->getService()->error($validator, JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+            throw new Exception($validator, JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->getService()->create($request);
     }
 
-    public function putAction(Request $request)
+    /**
+     * PUT /task/{id}
+     * Update all fields from task
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @throws \Domain\Task\Exception
+     */
+    public function putAction(Request $request) : JsonResponse
     {
-        $content = $this->getContent($request);
+        $content = $this->getContentAsArray($request);
         $validator = TaskValidator::toPut($content);
         if ($validator !== true) {
-            return $this->getService()->error($validator, JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+            throw new Exception($validator, JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->getService()->put($request);
     }
 
-    public function patchAction(Request $request)
+    /**
+     * PATCH /task/{id}
+     * Partial-Update task
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\jsonResponse
+     */
+    public function patchAction(Request $request) : JsoNResponse
     {
         return $this->getService()->patch($request);
     }
 
-    public function removeAction(int $id)
+    /**
+     * Remove task
+     *
+     * @param int $id
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function removeAction(int $id) : JsonResponse
     {
         return $this->getService()->remove($id);
     }
 
-    public function getService()
+    /**
+     * Get task service
+     *
+     * @return \Domain\Task\Service
+     */
+    private function getService() : Service
     {
         if (!$this->service instanceof Service) {
             $config = $this->getConfig();
@@ -72,20 +131,38 @@ class TaskController
                 $config->get('database.host'),
                 $config->get('database.port')
             ), $username, $password);
-            $this->service = new Service($database, $this->logger);
+            $repository = new Repository($database, $this->logger);
+            $this->service = new Service($repository);
         }
 
         return $this->service;
     }
 
-    protected function getConfig()
+    /**
+     * Get Config
+     *
+     * @return \Infra\Config
+     */
+    private function getConfig()
     {
         return Config::getInstance();
     }
 
-    protected function getContent(Request $request)
+    /**
+     * Get request content as array
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return array
+     * @throws \Domain\Task\Exception
+     */
+    private function getContentAsArray(Request $request) : array
     {
         $content = $request->getContent();
-        return json_decode($content, true);
+        $content = json_decode($content, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            throw new Exception(TaskValidator::MESSAGE_BAD_REQUEST, JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        return $content;
     }
 }

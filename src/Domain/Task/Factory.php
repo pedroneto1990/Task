@@ -5,6 +5,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Factory
 {
+    /**
+     * Make Entity from data request
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Domain\Task\Entity;
+     */
     static public function makeFromRequest(Request $request) : Entity
     {
         $json = $request->getContent();
@@ -37,6 +43,12 @@ class Factory
         return $entity;
     }
 
+    /**
+     * Make Entity from array
+     *
+     * @param array $data
+     * @return \Domain\Task\Entity
+     */
     static public function fromArray(array $data) : Entity
     {
         $entity = new Entity();

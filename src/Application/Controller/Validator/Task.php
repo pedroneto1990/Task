@@ -13,12 +13,23 @@ class Task
     const MESSAGE_INVALID_DONE = 'Invalid Done';
     const MESSAGE_GET_NOT_FOUND = 'Oops! Task not found!';
     const MESSAGE_INTERNAL_ERROR = 'Oops! Something is wrong!';
+    const MESSAGE_BAD_REQUEST = 'Bad request!';
 
+    /**
+     * Task types
+     * @var array
+     */
     static protected $types = [
         'shopping',
         'work'
     ];
 
+    /**
+     * Validate request to create a task
+     *
+     * @param array $request
+     * @return mixed (bool|string)
+     */
     static public function toCreate(array $request)
     {
         if (!isset($request['content']) || empty($request['content'])) {
@@ -32,6 +43,13 @@ class Task
         return true;
     }
 
+    /**
+     * Validate request to update a task
+     *
+     * @param array $request
+     *
+     * @return mixed (bool|string)
+     */
     static public function toPut(array $request)
     {
         if (!isset($request['sort_order']) || !is_numeric($request['sort_order'])) {

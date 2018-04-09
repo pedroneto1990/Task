@@ -35,7 +35,7 @@ class Entity
     /**
      * @param int $id
      */
-    public function setId($id)
+    public function setId($id) : void
     {
         $this->id = $id;
     }
@@ -51,7 +51,7 @@ class Entity
     /**
      * @param string $uuid
      */
-    public function setUuid(string $uuid)
+    public function setUuid(string $uuid) : void
     {
         $this->uuid = $uuid;
     }
@@ -99,7 +99,7 @@ class Entity
     /**
      * @param int $sortOrder
      */
-    public function setSortOrder(int $sortOrder)
+    public function setSortOrder(int $sortOrder) : void
     {
         $this->sortOrder = $sortOrder;
     }
@@ -115,7 +115,7 @@ class Entity
     /**
      * @param bool $done
      */
-    public function setDone(bool $done)
+    public function setDone(bool $done) : void
     {
         $this->done = $done;
     }
@@ -131,7 +131,7 @@ class Entity
     /**
      * @param string $dateCreated
      */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated($dateCreated) : void
     {
         if ($dateCreated instanceof \DateTime) {
             $dateCreated = $dateCreated->format('Y-m-d H:i:s');
@@ -140,9 +140,14 @@ class Entity
         $this->dateCreated = $dateCreated;
     }
 
-    public function toArray()
+    /**
+     * Transform object to array
+     *
+     * @return array
+     */
+    public function toArray() : array
     {
-        return $this->cleanValues([
+        return $this->removeNullValues([
             'id_task' => $this->getId(),
             'uuid' => $this->getUuid(),
             'type' => $this->getType(),
@@ -153,7 +158,13 @@ class Entity
         ]);
     }
 
-    protected function cleanValues(array $data)
+    /**
+     * Filter null values
+     *
+     * @param array $data
+     * @return array
+     */
+    private function removeNullValues(array $data) : array
     {
         return array_filter($data, function ($value) {
             return !is_null($value);
