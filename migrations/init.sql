@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `task` (
   `type` enum('work','shopping') NOT NULL,
   `sort_order` smallint(3) unsigned NOT NULL DEFAULT '1',
   `done` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `date_created` varchar(45) NOT NULL,
+  `date_created` DATETIME NOT NULL,
   `content` text NOT NULL,
   PRIMARY KEY (`id_task`),
   UNIQUE KEY `uuid_UNIQUE` (`uuid`),
